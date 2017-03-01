@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <stdexcept>
+#include <cmath>
 
 //class SpringVeterx
 void SpringVertex::addNeighbor(size_t i_nb, double len0) 
@@ -132,14 +134,16 @@ void SpringSolver::solve(double dt)
 	m_drag->setTimeStepSize(dt);
 	m_drag->preprocess(pts);
 	int count = 0;
-	for (SpringVertex* sv : pts)
+	for (size_t i = 0; i < pts.size(); i++)
 	{
+	    SpringVertex* sv = pts[i];
+
 	    if (sv->isRegistered())
 	    {
 		count++;
 	    }
 	}
-	printf("%d registered points\n", count);
+	std::cout << count << " registered points\n";
     }
     doSolve(dt);
     if (m_drag)

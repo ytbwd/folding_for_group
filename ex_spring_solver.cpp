@@ -1,4 +1,6 @@
 #include "spring_solver.h"
+#include <cmath>
+#include <iostream>
 
 void EX_SPRING_SOLVER::doSolve(double t) {
     const size_t size = pts.size();
@@ -16,13 +18,13 @@ void EX_SPRING_SOLVER::doSolve(double t) {
     int n_loop = t/dt+1;
     dt = t/n_loop;
 
-    printf("Starting spring solver:\n");
+    std::cout << "Starting spring solver:\n";
     for (int n = 0; n < n_loop; ++n)
     {
 	for (i = 0; i < ext_forces.size(); ++i)
 	    ext_forces[i]->computeExternalForce();
 
-        printf("    #sub_step  = %d/%d\n",n+1,n_loop);
+        std::cout << "    #sub_step  = " << n+1 << ' ' << n_loop << std::endl;
         for (i = 0; i < size; ++i)
             computeAccel(pts[i]);
 

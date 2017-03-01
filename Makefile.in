@@ -1,20 +1,20 @@
-CXX=mpicxx -g -rdynamic -fopenmp -pedantic -Wno-long-long -Wno-unused-result 
+CXX=@CXX@
 
-incs =   -I.. -I../util   -I/usr/local/pkg/hdf/include -DUSE_HDF   -DHAS_FENV    -D__MPI__  -D__GD__ -I/usr/local/pkg/gd/include  -D__HYPRE__   -I../include -D__DAMPING__
-libincs =  -L/usr/local/pkg/gd/lib  -L/usr/lib -L/usr/local/pkg/hdf/lib  -L../lib/x86_64 -L.
-libs = -lgd   -lmfhdf -ldf -ljpeg -lz  -lmpich -lpthread -lmpfr -lm
+incs =  @ftlibincs@ -I../include -D__DAMPING__
+libincs = @otherlibsinc@ -L../lib/x86_64 -L.
+libs = @otherlibs@ -lmpich -lpthread -lmpfr
 
-CGAL_DIR=/usr/local/pkg/cgal
-CVODE_DIR=/usr/local/pkg/cvode
+CGAL_DIR=@CGAL_DIR@
+CVODE_DIR=@CVODE_DIR@
 
-CGAL_Include=-I/usr/local/pkg/cgal/include
-CGAL_Lib=-L/usr/local/pkg/cgal/lib -lCGAL_Core -lCGAL_ImageIO -lCGAL -lCGAL_Core -lCGAL_ImageIO -lCGAL
+CGAL_Include=@CGAL_INCLUDE@
+CGAL_Lib=@CGAL_LIB@ -lCGAL_Core -lCGAL_ImageIO -lCGAL
 
-CVODE_Include=-I/usr/local/pkg/cvode/include
-CVODE_Lib=-L/usr/local/pkg/cvode/lib -lsundials_cvode -lsundials_nvecserial
+CVODE_Include=@CVODE_INCLUDE@
+CVODE_Lib=@CVODE_LIB@ -lsundials_cvode -lsundials_nvecserial
 
 test: test.o folding.o folding_helper.o drag.o dcollid3d.o dcollid.o spring_solver.o drag_proto.o ex_spring_solver.o im_spring_solver.o bending.o libiF.a cgal.o
-	$(CXX) $^ -lFronTier -o test $(libincs) $(libs) $(incs) $(CGAL_Include) $(CGAL_Lib) $(CVODE_Include) $(CVODE_Lib) -lgmp -lmpfr -frounding-math -liF
+	$(CXX) $^ -lFronTier -lm -o test $(libincs) $(libs) $(incs) $(CGAL_Include) $(CGAL_Lib) $(CVODE_Include) $(CVODE_Lib) -lgmp -lmpfr -frounding-math -liF
 dcollid3d.o: ../Collision/dcollid3d.cpp
 	$(CXX) $< -c $(incs) $(CGAL_Include) -frounding-math
 dcollid.o: ../Collision/dcollid.cpp

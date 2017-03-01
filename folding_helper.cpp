@@ -1,6 +1,6 @@
 #include <FronTier.h>
 #include "spring_solver.h"
-#include <unordered_map>
+#include <map>
 #include "../iFluid/ifluid_state.h"
 #include "folding.h"
 
@@ -11,13 +11,13 @@ static void unsortSurface(SURFACE*);
 static void unsortCurve(CURVE*);
 
 static void assemblePointsFromSurf(SURFACE*, std::vector<SpringVertex*>&,
-				std::unordered_map<POINT*, size_t>&);
+				std::map<POINT*, size_t>&);
 static void assemblePointsFromCurve(CURVE*, std::vector<SpringVertex*>& pts,
-				std::unordered_map<POINT*, size_t>&);
+				std::map<POINT*, size_t>&);
 static void assemblePointsFromNode(NODE*, std::vector<SpringVertex*>& pts,
-				std::unordered_map<POINT*, size_t>&);
+				std::map<POINT*, size_t>&);
 
-static void setConnection(POINT* p1, POINT* p2, double length0, std::vector<SpringVertex*>& pts, std::unordered_map<POINT*, size_t>&);
+static void setConnection(POINT* p1, POINT* p2, double length0, std::vector<SpringVertex*>& pts, std::map<POINT*, size_t>&);
 
 static  SpringVertex* FT_Point2SpringVertex(POINT*);
 
@@ -44,7 +44,7 @@ extern void FT_Intfc2SpringMesh(INTERFACE* intfc, std::vector<SpringVertex*>&pts
     //this function should be called before
     //spring interior dynamics computed
 
-    std::unordered_map<POINT*, size_t> ht;
+    std::map<POINT*, size_t> ht;
     //clear hash table and point list
     ht.clear();
     pts.clear();
@@ -78,7 +78,7 @@ extern void FT_Intfc2SpringMesh(INTERFACE* intfc, std::vector<SpringVertex*>&pts
 
 static void assemblePointsFromSurf(SURFACE* s, 
 			std::vector<SpringVertex*>& pts,
-			std::unordered_map<POINT*, size_t>& ht) {
+			std::map<POINT*, size_t>& ht) {
         TRI* tris[20];
         TRI* tri;
         surf_tri_loop(s,tri)
@@ -103,7 +103,7 @@ static void assemblePointsFromSurf(SURFACE* s,
 
 static void assemblePointsFromCurve(CURVE *curve, 
 				std::vector<SpringVertex*>& pts,
-				std::unordered_map<POINT*, size_t>& ht) {
+				std::map<POINT*, size_t>& ht) {
  	//assemble from curve
 	for (BOND* b = curve->first; b != curve->last; b = b->next)
         for (int i = 0; i < 2; ++i)
@@ -141,7 +141,7 @@ static void assemblePointsFromCurve(CURVE *curve,
 
 static void assemblePointsFromNode(NODE* n, 
 			std::vector<SpringVertex*>& pts,
-			std::unordered_map<POINT*, size_t>& ht) {
+			std::map<POINT*, size_t>& ht) {
     for (CURVE** c = n->in_curves; c && *c; ++c)
     {
         if (!isElasticCurve(*c)) continue;
@@ -165,7 +165,7 @@ static void assemblePointsFromNode(NODE* n,
 
 static void setConnection(POINT* p1, POINT* p2, double length0, 
 			std::vector<SpringVertex*>& pts,
-			std::unordered_map<POINT*, size_t>& ht) {
+			std::map<POINT*, size_t>& ht) {
     POINT* points[2] = {p1,p2};
     for (int i = 0; i < 2; ++i) {
         if (ht.find(points[i]) == ht.end()) {

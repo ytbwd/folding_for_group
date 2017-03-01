@@ -69,9 +69,9 @@ protected:
     enum {FREE_POINT,ROTATE_POINT, STATIC_POINT, TRANS_DPOINT, 
 		TRANS_CPOINT1, TRANS_CPOINT2};
     double m_dt;
-    bool first = true;
-    Drag(double t) : m_t(t) {}
-    Drag(){}
+    bool first;
+    Drag(double t) : m_t(t) { first = true; }
+    Drag(){ first = true; }
 };
 
 class PLANE

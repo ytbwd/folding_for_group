@@ -2,7 +2,7 @@
 #include "spring_solver.h"
 #include <fstream>
 #include <sstream>
-#include <unordered_map>
+#include <map>
 #include <iomanip>
 #include <cstdlib>
 
@@ -14,7 +14,7 @@ double Folder::m_thickness = 0.001;
 double Folder::max_dt = 0.01;
 
 void Folder::addDragsFromFile(std::string fname) {
-    std::ifstream ifs(fname);
+    std::ifstream ifs(fname.c_str());
     if (!ifs.is_open()) {
 	std::cout << "File \"" << fname << 
 	"\" doesn't exist" << std::endl;
@@ -67,7 +67,7 @@ void Folder::addDragsFromFile(std::string fname) {
         }
 	else
         {
-            while (temp.back() != ':')
+            while (temp[temp.length()-1] != ':')
                 ss >> temp;
             while (ss >> tmp)
                 info.data().push_back(tmp);
@@ -159,7 +159,7 @@ void Folder3d::doFolding() {
     for (std::vector<Drag*>::iterator it = drags.begin();
 	 it != drags.end(); ++it) 
     {
-	if (*it == nullptr) continue;
+	if (*it == NULL) continue;
 	printf("folding base on %lu drag: %s ...\n",
 		it-drags.begin(),(*it)->id().c_str());
 	doFolding(*it,sp_solver,cd_solver);
@@ -222,9 +222,6 @@ void Folder3d::doFolding(
 	cd_solver->setTimeStepSize(dt);
 
     	sp_solver->solve(dt);
-        // only update vel for line drag
-        if (t > 0.5)
-            drag->updateVel(sp_solver->getSpringMesh(), t); 
 	
 	recordData(t,movie->out_dir);
 
@@ -244,7 +241,7 @@ void Folder3d::doFolding(
 void Folder3d::check_force(SpringSolver* sp_solver)
 {
     std::vector<SpringVertex*> pts = sp_solver->getSpringMesh(); 
-    std::unordered_map<POINT*, SpringVertex*> pToVer; 
+    std::map<POINT*, SpringVertex*> pToVer; 
     int i;  
 
     for (size_t j = 0; j < pts.size(); j++)
@@ -321,10 +318,10 @@ void Folder3d::appendDataToFile(double x, double y, std::string fname)
     if (dataFileSet.find(fname) == dataFileSet.end())
     {
 	dataFileSet.insert(fname);
-	ofs.open(fname, std::ofstream::trunc);
+	ofs.open(fname.c_str(), std::ofstream::trunc);
 	ofs.close();
     }
-    ofs.open(fname, std::ofstream::app);
+    ofs.open(fname.c_str(), std::ofstream::app);
     ofs << x << " " << y << std::endl;
     ofs.close();
 }
@@ -352,14 +349,16 @@ void Folder3d::setupMovie(std::string dname, std::string oname,
 }
 
 void Movie::recordMovieFrame() {
-    std::string fname = mv_gv_dir + "/intfc-" + std::to_string(mv_count);
+    std::stringstream ss; 
+    std::string count; 
+    
+    ss << std::setw(6) << std::setfill('0') << mv_count; 
+    count = ss.str(); 
+
+    std::string fname = mv_gv_dir + "/intfc-" + count;
     gview_plot_interface(fname.c_str(),mv_intfc);
 
     // keep marking number to have fixed number of digits
-    std::string count; 
-    std::stringstream ss;
-    ss << std::setw(6) << std::setfill('0') << mv_count;
-    count = ss.str();
     fname = mv_vtk_dir + "/vtk-" + count;
     std::string sys_cmd = "mkdir -p " + fname; 
     system(sys_cmd.c_str());

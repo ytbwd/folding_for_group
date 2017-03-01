@@ -41,9 +41,9 @@ private:
     void checkVertexNeighbors();
 public:
     struct SpringParameter {
-	double k = 0;
-	double lambda = 0;
-	double m = 0;
+	double k;
+	double lambda;
+	double m;
 	SpringParameter(){}
 	SpringParameter(double stf, double fri, double mas) :
 		k(stf), lambda(fri), m(mas) {}

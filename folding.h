@@ -26,7 +26,7 @@ public:
     void setInputFile(std::string& s) { inname = s; }
     std::string& getInputFile() { return inname; }
 protected:
-    Folder(){}
+    Folder(){ SpringSolver::ODE_SCHEME ode_scheme = SpringSolver::EXPLICIT; }
     double getThickness(){return m_thickness;}
     double getFrameStepSize() {return max_dt;}
     std::vector<Drag*> drags;
@@ -35,7 +35,7 @@ private:
     static double max_dt;
     static double m_thickness;
     std::string inname; 
-    SpringSolver::ODE_SCHEME ode_scheme = SpringSolver::EXPLICIT;
+    SpringSolver::ODE_SCHEME ode_scheme;
 };
 
 struct Movie;

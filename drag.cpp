@@ -1,5 +1,8 @@
 #include "drag.h"
 #include <iostream>
+#include <cmath>
+#include <limits>
+
 const double EPS = 1e-15;
 static bool isPointInBall(double p[], double c[], double r);
 static double Dot3d(const double*,const double*);
@@ -171,7 +174,8 @@ void Drag::spinToAxis(double* cen, double* dir, double theta, double* p)
     if (len < EPS)
     {
 	std::cout << "Warning: len < EPS" << std::endl;
-        printf("dir = %f %f %f\n",dir[0],dir[1],dir[2]);
+        std::cout << "dir = " << dir[0] << ' ' << dir[1] << ' ' << dir[2] 
+		<< std::endl;
 	return;
     }
     else
@@ -376,7 +380,7 @@ void GravityDrag::setAccel(SpringVertex* sv) {
 }
 
 GravityDrag::GravityDrag(const double c[], const double r, const double a[], double t)
-             : PointDrag(c,r,nullptr,a,t) {}
+             : PointDrag(c,r,NULL,a,t) {}
 
 Drag* GravityDrag::clone(const Drag::Info& info) {
     if (!validateData(info)) 
@@ -816,20 +820,23 @@ void RelaxDrag::preprocess(std::vector<SpringVertex*>& pts)
     double min_coords[3] = {L, L, L};
     double max_coords[3] = {S, S, S};
     SpringVertex* b_pts[6];
-    for (SpringVertex* sv : pts)
+
+    for (size_t i = 0; i < pts.size(); i++)
     {
+	SpringVertex* sv = pts[i]; 
+
 	sv->unsetRegistered();
-	for (int i = 0; i < 3; ++i)
+	for (int j = 0; j < 3; ++j)
 	{
-	    if (sv->getCoords()[i] < min_coords[i])
+	    if (sv->getCoords()[j] < min_coords[j])
 	    {
-		b_pts[i] = sv;
-		min_coords[i] = sv->getCoords()[i];
+		b_pts[j] = sv;
+		min_coords[j] = sv->getCoords()[j];
 	    }
-	    if (sv->getCoords()[i] > max_coords[i])
+	    if (sv->getCoords()[j] > max_coords[j])
 	    {
-		b_pts[3+i] = sv;
-		max_coords[i] = sv->getCoords()[i];
+		b_pts[3+j] = sv;
+		max_coords[j] = sv->getCoords()[j];
 	    }
 	}
     }
@@ -866,17 +873,19 @@ static void computeCenter(std::vector<SpringVertex*>& sv, double* c)
 	std::cout << "memory is not allocated" << std::endl;
     }
     std::fill(c, c+3, 0.0);
-    for (SpringVertex* p : sv)
+    for (size_t i = 0; i < sv.size(); i++)
     {
+	SpringVertex* p = sv[i];
 	double* coords = p->getCoords();
-	for (int i = 0; i < 3; ++i)
+
+	for (int j = 0; j < 3; ++j)
 	{
-	    c[i] += coords[i];
+	    c[j] += coords[j];
 	}
     }
-    for (int i = 0; i < 3; ++i)
+    for (int j = 0; j < 3; ++j)
     {
-	c[i] /= (double)sv.size();
+	c[j] /= (double)sv.size();
     }
 }
 
@@ -904,12 +913,13 @@ void SeparateDrag::postprocess(std::vector<SpringVertex*>& sv)
 {
     double body_center[3] = {0};
     computeCenter(sv, body_center);
-    for (SpringVertex* p : sv)
+    for (size_t i = 0; i < sv.size(); i++)
     {
+	SpringVertex* p = sv[i];
 	double* coords = p->getCoords();
-	for (int i = 0; i < 3; ++i)
+	for (int j = 0; j < 3; ++j)
 	{
-	    coords[i] = coords[i] - body_center[i] + old_body_center[i];
+	    coords[j] = coords[j] - body_center[j] + old_body_center[j];
 	}
     }
 }
@@ -983,8 +993,9 @@ Drag* RollDrag::clone(const Drag::Info& info)
 void RollDrag::preprocess(std::vector<SpringVertex*>& pts)
 {
     double bound = spacing * 2.0 * M_PI * num_layers + getTolerance();
-    for(SpringVertex* sv : pts)
+    for(size_t i = 0; i < pts.size(); i++)
     {
+        SpringVertex* sv = pts[i];
 	if (pointToLine(sv->getCoords(), spin_center, spin_dir) < bound)
 	{
 	     sv->setRegistered();
