@@ -6,12 +6,24 @@
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
-
 //class SpringVeterx
 void SpringVertex::addNeighbor(size_t i_nb, double len0) 
 {
     index_nb.push_back(i_nb);
     length0.push_back(len0);
+}
+
+SpringVertex::SpringVertex(SpringVertex& spv)
+{
+    x = spv.x;
+    v = spv.v;
+    org_vtx = spv.org_vtx;
+    std::copy(spv.accel, spv.accel+3, accel);
+    std::copy(spv.ext_accel, spv.ext_accel+3, ext_accel);
+    index_nb = spv.index_nb;
+    length0 = spv.length0;
+    is_registered = spv.is_registered;
+    point_type = spv.point_type;
 }
 
 //class SpringSolver
@@ -134,16 +146,14 @@ void SpringSolver::solve(double dt)
 	m_drag->setTimeStepSize(dt);
 	m_drag->preprocess(pts);
 	int count = 0;
-	for (size_t i = 0; i < pts.size(); i++)
+	for (int i = 0; i < (int)pts.size(); i++)
 	{
-	    SpringVertex* sv = pts[i];
-
+	    SpringVertex* sv = pts[i]; 
 	    if (sv->isRegistered())
 	    {
 		count++;
 	    }
 	}
-	std::cout << count << " registered points\n";
     }
     doSolve(dt);
     if (m_drag)

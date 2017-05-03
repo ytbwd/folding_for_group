@@ -21,8 +21,14 @@ struct SpringVertex
     //set up before applying drag
     int point_type;
     
-    SpringVertex():is_registered(false){}
-    ~SpringVertex(){}
+    SpringVertex():is_registered(false){ 
+	for (int i = 0; i < 3; i++) { 
+	     accel[i] = 0.0; 
+	     ext_accel[i] = 0.0; 
+	}
+    }
+    SpringVertex(SpringVertex&);
+    virtual ~SpringVertex(){}
     double* getVel() {return v;}
     double* getCoords() {return x;}
     double* getExternalAccel() {return ext_accel;}

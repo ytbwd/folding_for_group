@@ -7,75 +7,77 @@
 #include <cstdlib>
 
 static void setCollisionFreePoints3d(INTERFACE*, Drag*);
+static bool string_double(const std::string& s); 
+
 bool findAndLocate(std::ifstream&, const char*);
 bool getString(std::ifstream&, const char*);
 
 double Folder::m_thickness = 0.001;
 double Folder::max_dt = 0.01;
 
+bool string_double(const std::string& s) {
+    int numD = 0;
+
+    for (int i = 0; i < s.size(); i++) {
+         if (i == 0 && s[i] == '-') continue;
+         if (s[i] < '0' || s[i] > '9')
+             if (s[i] == '.' && numD < 1) {
+                 numD++;
+                 continue;
+             }
+             else return false;
+        else continue;
+    }
+    return true;
+
+}
+
 void Folder::addDragsFromFile(std::string fname) {
     std::ifstream ifs(fname.c_str());
     if (!ifs.is_open()) {
-	std::cout << "File \"" << fname << 
-	"\" doesn't exist" << std::endl;
-        return; 
+        std::cout << "File \"" << fname <<
+        "\" doesn't exist" << std::endl;
+        return;
     }
 
-    std::string line;
-    std::string temp; 
-    double tmp;
     Drag::Info info;
     std::set<std::string> foldset;
-    
+
     for (std::vector<Drag*>::iterator it = Drag::prototypes.begin();
                 it != Drag::prototypes.end(); it++)
          foldset.insert((*it) -> id());
-    getline(ifs, line);
-    while (true) {
-        if (ifs.eof())
-        {
-            if (!info.empty())
-            {
-                addDrag(Drag::dragFactory(info));
-                info.clear();
-            }
-            break;
-        }
-        if (line[0] == '\0')
-        {
-            addDrag(Drag::dragFactory(info));
-            info.clear();
-            getline(ifs, line);
-            continue;
-        }
 
-        std::istringstream ss(line);
-        ss >> temp;
-        if (foldset.find(temp) != foldset.end())
+    std::string s;
+    info.clear();
+    while (ifs >> s)
+    {
+	//three cases: drag name, numeric, garbage
+	if (find(foldset.begin(), foldset.end(), s) != foldset.end())
         {
-                info.id() = temp;
-                while (ss >> tmp)
-                        info.data().push_back(tmp);
+	    // new drag found, create drag using info
+	    // begin to collect information for new drag
+	    if (info.data().size() != 0)
+             {
                 addDrag(Drag::dragFactory(info));
-                info.clear();
+             }
+             info.clear();
+             info.id() = s;
         }
-        else if (temp == "foldingplan")
+        else
         {
-            ss >> info.id();
-            while (ss >> tmp)
-                info.data().push_back(tmp);
+	    //check if it is a double
+             if (!string_double(s)) continue;
+
+	     std::stringstream ss(s);
+	     double temp; 
+	     ss >> temp;  
+
+             info.data().push_back(temp);
         }
-	else
-        {
-            while (temp[temp.length()-1] != ':')
-                ss >> temp;
-            while (ss >> tmp)
-                info.data().push_back(tmp);
-        }
-        getline(ifs, line);
     }
-    ifs.clear();
-    ifs.close();
+    //last drag
+    if (info.data().size() != 0)
+        addDrag(Drag::dragFactory(info));
 }
 
 void Folder::setSpringParameters(double k, double lambda, double m) {
@@ -209,6 +211,7 @@ void Folder3d::doFolding(
     double t0 = 0; 
     static double t = 0;
     double dt = max_dt;
+    printf("drag = %s, m_t = %f\n", drag->id().c_str(), drag->m_t);
     movie->recordMovieFrame();
     while (t0 < drag->m_t - MACH_EPS) {
 	printf("--------------------------------\n");
@@ -225,7 +228,7 @@ void Folder3d::doFolding(
 	
 	recordData(t,movie->out_dir);
 
-	cd_solver->resolveCollision();
+	//cd_solver->resolveCollision();
 
 	t += dt;
         t0 += dt; 

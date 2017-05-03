@@ -166,6 +166,9 @@ void initFabric(Front* front, std::ifstream& fin, SURFACE* &surf) {
                 case 'C' :
 		case 'c' : crs = new cgalCircleSurf(front->interf, &surf);
 			   break; 
+		case 'P' :
+                case 'p' : crs = new cgalParaSurf(front->interf, &surf);
+                           break;
 		default : std::cout << "Unknown fabric shape\n"; 
 			  clean_up(ERROR);
 	    }
